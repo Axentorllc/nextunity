@@ -30,7 +30,7 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Material Request": "public/js/material_request.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -121,7 +121,7 @@ app_license = "MIT"
 # ------------------------------
 #
 override_whitelisted_methods = {
-	"erpnext.selling.doctype.sale_order.sale_order.make_work_orders": "nextunity.nextunity.custom_sale_order.make_work_orders"
+	"erpnext.selling.doctype.sales_order.sales_order.make_work_orders": "nextunity.nextunity.custom_sale_order.make_work_orders"
 }
 #
 # each overriding function accepts a `data` argument;

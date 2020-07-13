@@ -10,7 +10,6 @@ form_grid_templates = {
 
 @frappe.whitelist()
 def make_work_orders(items, sales_order, company, project=None):
-	print("*******************************************",sales_order)
 	'''Make Work Orders against the given Sales Order for the given `items`'''
 	items = json.loads(items).get('items')
 	out = []
@@ -36,8 +35,37 @@ def make_work_orders(items, sales_order, company, project=None):
 		work_order.set_work_order_operations()
 		work_order.save()
 		out.append(work_order)
-		print("###########################################################",work_order.name)
 		work_odr = work_order.name
 		name = i.get("name")
-		frappe.db.sql("""  update `tabSales Order Item` set work_order = %(work_odr)s where name = %(name)s """,{"work_odr":work_odr,"name":name})
+		pre_record = frappe.db.sql("""  select work_order from `tabSales Order Item`where name = %(name)s """,
+					  { "name": name})
+		if pre_record[0][0] == "None":
+			final_record = work_odr
+			frappe.db.sql("""  update `tabSales Order Item` set work_order = %(final_record)s where name = %(name)s """,
+						  {"final_record": final_record, "name": name})
+		else:
+			final_record = pre_record[0][0] +","+"  "+ work_odr
+			frappe.db.sql("""  update `tabSales Order Item` set work_order = %(final_record)s where name = %(name)s """,{"final_record":final_record,"name":name})
 	return [p.name for p in out]
+
+@frappe.whitelist()
+def make_material_req(name):
+	pre_result = frappe.db.sql(""" select material_request from `tabSales Order Item` where name = %(name)s """,{"name":name})
+	if pre_result[0][0] == "None":
+		mat_req =  frappe.db.sql(""" select parent from `tabMaterial Request Item` where sales_order_item = %(name)s """,{"name":name})
+		mat_req_id = mat_req[0][0]
+		obj = frappe.get_doc("Sales Order Item",name)
+		obj.material_request =  mat_req_id
+		obj.save()
+		obj.submit()
+	else:
+		mat_req = frappe.db.sql(""" select parent from `tabMaterial Request Item` where sales_order_item = %(name)s """,
+								{"name": name})
+		mat_req_id = pre_result[0][0]+","+"  "+ mat_req[0][0]
+		obj = frappe.get_doc("Sales Order Item", name)
+		obj.material_request = mat_req_id
+		obj.save()
+		obj.submit()
+
+
+
